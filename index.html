@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Forever · פארק הים, ראשון לציון</title>
+<style>
+  :root{
+    --bg:#0a0f14; --bg2:#10171f; --gold:#c9a86a; --gold-soft:#d8c39a; --ink:#e8eef3;
+    --frame-shadow:0 50px 130px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-snap-type:y mandatory;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{background:radial-gradient(120% 90% at 50% 0%, #16202b 0%, var(--bg) 55%, #060a0e 100%);
+    color:var(--ink);font-family:"Heebo","Assistant",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
+  .progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;background:rgba(255,255,255,.05)}
+  .progress .bar{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-soft));box-shadow:0 0 14px rgba(201,168,106,.6);transition:width .15s linear}
+  main{display:block}
+  .slide{min-height:100svh;height:100svh;display:flex;align-items:center;justify-content:center;
+    scroll-snap-align:center;scroll-snap-stop:always;position:relative;padding:clamp(14px,4vh,52px)}
+  .frame{position:relative;width:auto;max-width:min(94vw,1640px);max-height:88svh;line-height:0;border-radius:8px;overflow:hidden;
+    box-shadow:var(--frame-shadow);opacity:.12;transform:scale(.965) translateY(26px);
+    transition:opacity 1.05s cubic-bezier(.16,1,.3,1),transform 1.25s cubic-bezier(.16,1,.3,1);will-change:opacity,transform}
+  .slide img{display:block;max-width:min(94vw,1640px);max-height:88svh;width:auto;height:auto}
+  .slide.active .frame{opacity:1;transform:none}
+  /* video overlay positioned over the photo area of a slide */
+  .ytbox{position:absolute;border-radius:10px;overflow:hidden;background:#000;
+    box-shadow:0 14px 40px -10px rgba(0,0,0,.55)}
+  .ytbox iframe{width:100%;height:100%;border:0;display:block}
+  .ytfacade{position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;margin:0;cursor:pointer;background:#000;overflow:hidden;line-height:0}
+  .ytfacade .ytthumb{width:100%;height:100%;object-fit:cover;display:block;opacity:.94;transition:opacity .5s ease,transform 7s ease}
+  .ytfacade:hover .ytthumb{opacity:1;transform:scale(1.045)}
+  .ytfacade .ytplay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:78px;height:54px;border-radius:14px;background:rgba(18,18,18,.82);
+    display:flex;align-items:center;justify-content:center;transition:background .3s ease,transform .3s ease;box-shadow:0 6px 22px rgba(0,0,0,.4)}
+  .ytfacade .ytplay svg{margin-inline-start:3px}
+  .ytfacade:hover .ytplay{background:#cc0000;transform:translate(-50%,-50%) scale(1.07)}
+  .dots{position:fixed;top:50%;left:22px;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:11px;align-items:center}
+  .dot{width:8px;height:8px;border-radius:50%;border:0;padding:0;cursor:pointer;background:rgba(232,238,243,.28);transition:all .45s cubic-bezier(.16,1,.3,1)}
+  .dot:hover{background:rgba(232,238,243,.7);transform:scale(1.25)}
+  .dot.on{background:var(--gold);height:22px;border-radius:5px;box-shadow:0 0 12px rgba(201,168,106,.7)}
+  .counter{position:fixed;bottom:26px;left:28px;z-index:50;font-variant-numeric:tabular-nums;letter-spacing:.18em;font-size:13px;color:rgba(232,238,243,.55);direction:ltr;display:flex;gap:7px;align-items:baseline}
+  .counter .cur{color:var(--gold-soft);font-size:17px}
+  .counter .sep{opacity:.4}
+  .brand{position:fixed;top:20px;right:26px;z-index:50;font-size:12px;letter-spacing:.34em;color:rgba(232,238,243,.5);text-transform:uppercase;font-weight:300}
+  .brand b{color:var(--gold-soft);font-weight:500}
+  .scrollhint{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;
+    color:rgba(232,238,243,.7);font-size:12.5px;letter-spacing:.22em;animation:floaty 2.4s ease-in-out infinite;transition:opacity .8s ease;z-index:40}
+  .scrollhint svg{opacity:.85}
+  @keyframes floaty{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+  body.scrolled .scrollhint{opacity:0;pointer-events:none}
+  @media (max-width:640px){.dots{left:12px;gap:9px}.dot.on{height:18px}.counter{left:14px;bottom:16px;font-size:12px}.brand{right:14px;top:14px;letter-spacing:.26em;font-size:10.5px}.slide{padding:10px}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.frame{transition:opacity .4s ease;transform:none}.slide.active .frame{transform:none}.scrollhint{animation:none}}
+</style>
+</head>
+<body>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div class="brand"><b>Forever</b> · פארק הים</div>
+  <nav class="dots" id="dots"><button class="dot" data-go="1" aria-label="מעבר לשקופית 1"></button><button class="dot" data-go="2" aria-label="מעבר לשקופית 2"></button><button class="dot" data-go="3" aria-label="מעבר לשקופית 3"></button><button class="dot" data-go="4" aria-label="מעבר לשקופית 4"></button><button class="dot" data-go="5" aria-label="מעבר לשקופית 5"></button><button class="dot" data-go="6" aria-label="מעבר לשקופית 6"></button><button class="dot" data-go="7" aria-label="מעבר לשקופית 7"></button><button class="dot" data-go="8" aria-label="מעבר לשקופית 8"></button><button class="dot" data-go="9" aria-label="מעבר לשקופית 9"></button><button class="dot" data-go="10" aria-label="מעבר לשקופית 10"></button><button class="dot" data-go="11" aria-label="מעבר לשקופית 11"></button><button class="dot" data-go="12" aria-label="מעבר לשקופית 12"></button><button class="dot" data-go="13" aria-label="מעבר לשקופית 13"></button><button class="dot" data-go="14" aria-label="מעבר לשקופית 14"></button><button class="dot" data-go="15" aria-label="מעבר לשקופית 15"></button><button class="dot" data-go="16" aria-label="מעבר לשקופית 16"></button><button class="dot" data-go="17" aria-label="מעבר לשקופית 17"></button><button class="dot" data-go="18" aria-label="מעבר לשקופית 18"></button><button class="dot" data-go="19" aria-label="מעבר לשקופית 19"></button><button class="dot" data-go="20" aria-label="מעבר לשקופית 20"></button><button class="dot" data-go="21" aria-label="מעבר לשקופית 21"></button><button class="dot" data-go="22" aria-label="מעבר לשקופית 22"></button></nav>
+  <div class="counter"><span class="cur" id="cur">01</span><span class="sep">/</span><span class="tot">22</span></div>
+
+  <main id="deck">
+    <!-- ===== שקף 1 ===== -->
+    <section class="slide" id="s1" data-index="1">
+      <div class="frame"><img loading="eager" src="slides/slide-01.jpg" alt="שקופית 1"></div>
+      <div class="scrollhint" aria-hidden="true">
+        <span>גללו למטה</span>
+        <svg viewBox="0 0 24 24" width="22" height="22"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </section>
+    <!-- ===== שקף 2 ===== -->
+    <section class="slide" id="s2" data-index="2">
+      <div class="frame"><img loading="eager" src="slides/slide-02.jpg" alt="שקופית 2"></div>
+    </section>
+    <!-- ===== שקף 3 ===== -->
+    <section class="slide" id="s3" data-index="3">
+      <div class="frame frame-has-video"><img loading="lazy" src="slides/slide-03.jpg" alt="שקופית 3"><div class="ytbox" data-yt="HsNEZ3fGNsU" style="left:35.1%;top:18.8%;width:61.3%;height:59.6%"><button class="ytfacade" type="button" aria-label="הפעלת הסרטון"><img class="ytthumb" src="https://i.ytimg.com/vi/HsNEZ3fGNsU/maxresdefault.jpg" onerror="this.onerror=function(){this.onerror=null;this.src='https://i.ytimg.com/vi/HsNEZ3fGNsU/hqdefault.jpg'};this.src='https://i.ytimg.com/vi/HsNEZ3fGNsU/sddefault.jpg'" alt=""><span class="ytplay"><svg viewBox="0 0 24 24" width="34" height="34"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span></button></div></div>
+    </section>
+    <!-- ===== שקף 4 ===== -->
+    <section class="slide" id="s4" data-index="4">
+      <div class="frame"><img loading="lazy" src="slides/slide-04.jpg" alt="שקופית 4"></div>
+    </section>
+    <!-- ===== שקף 5 ===== -->
+    <section class="slide" id="s5" data-index="5">
+      <div class="frame"><img loading="lazy" src="slides/slide-05.jpg" alt="שקופית 5"></div>
+    </section>
+    <!-- ===== שקף 6 ===== -->
+    <section class="slide" id="s6" data-index="6">
+      <div class="frame"><img loading="lazy" src="slides/slide-06.jpg" alt="שקופית 6"></div>
+    </section>
+    <!-- ===== שקף 7 ===== -->
+    <section class="slide" id="s7" data-index="7">
+      <div class="frame"><img loading="lazy" src="slides/slide-07.jpg" alt="שקופית 7"></div>
+    </section>
+    <!-- ===== שקף 8 ===== -->
+    <section class="slide" id="s8" data-index="8">
+      <div class="frame"><img loading="lazy" src="slides/slide-08.jpg" alt="שקופית 8"></div>
+    </section>
+    <!-- ===== שקף 9 ===== -->
+    <section class="slide" id="s9" data-index="9">
+      <div class="frame"><img loading="lazy" src="slides/slide-09.jpg" alt="שקופית 9"></div>
+    </section>
+    <!-- ===== שקף 10 ===== -->
+    <section class="slide" id="s10" data-index="10">
+      <div class="frame"><img loading="lazy" src="slides/slide-10.jpg" alt="שקופית 10"></div>
+    </section>
+    <!-- ===== שקף 11 ===== -->
+    <section class="slide" id="s11" data-index="11">
+      <div class="frame"><img loading="lazy" src="slides/slide-11.jpg" alt="שקופית 11"></div>
+    </section>
+    <!-- ===== שקף 12 ===== -->
+    <section class="slide" id="s12" data-index="12">
+      <div class="frame"><img loading="lazy" src="slides/slide-12.jpg" alt="שקופית 12"></div>
+    </section>
+    <!-- ===== שקף 13 ===== -->
+    <section class="slide" id="s13" data-index="13">
+      <div class="frame"><img loading="lazy" src="slides/slide-13.jpg" alt="שקופית 13"></div>
+    </section>
+    <!-- ===== שקף 14 ===== -->
+    <section class="slide" id="s14" data-index="14">
+      <div class="frame"><img loading="lazy" src="slides/slide-14.jpg" alt="שקופית 14"></div>
+    </section>
+    <!-- ===== שקף 15 ===== -->
+    <section class="slide" id="s15" data-index="15">
+      <div class="frame"><img loading="lazy" src="slides/slide-15.jpg" alt="שקופית 15"></div>
+    </section>
+    <!-- ===== שקף 16 ===== -->
+    <section class="slide" id="s16" data-index="16">
+      <div class="frame"><img loading="lazy" src="slides/slide-16.jpg" alt="שקופית 16"></div>
+    </section>
+    <!-- ===== שקף 17 ===== -->
+    <section class="slide" id="s17" data-index="17">
+      <div class="frame"><img loading="lazy" src="slides/slide-17.jpg" alt="שקופית 17"></div>
+    </section>
+    <!-- ===== שקף 18 ===== -->
+    <section class="slide" id="s18" data-index="18">
+      <div class="frame"><img loading="lazy" src="slides/slide-18.jpg" alt="שקופית 18"></div>
+    </section>
+    <!-- ===== שקף 19 ===== -->
+    <section class="slide" id="s19" data-index="19">
+      <div class="frame"><img loading="lazy" src="slides/slide-19.jpg" alt="שקופית 19"></div>
+    </section>
+    <!-- ===== שקף 20 ===== -->
+    <section class="slide" id="s20" data-index="20">
+      <div class="frame"><img loading="lazy" src="slides/slide-20.jpg" alt="שקופית 20"></div>
+    </section>
+    <!-- ===== שקף 21 ===== -->
+    <section class="slide" id="s21" data-index="21">
+      <div class="frame"><img loading="lazy" src="slides/slide-21.jpg" alt="שקופית 21"></div>
+    </section>
+    <!-- ===== שקף 22 ===== -->
+    <section class="slide" id="s22" data-index="22">
+      <div class="frame"><img loading="lazy" src="slides/slide-22.jpg" alt="שקופית 22"></div>
+    </section>
+  </main>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dots   = Array.prototype.slice.call(document.querySelectorAll('.dot'));
+  var bar=document.getElementById('bar'), curEl=document.getElementById('cur');
+  var total=slides.length, active=0;
+  function setActive(i){
+    if(i===active){slides[i].classList.add('active');return;}
+    active=i;
+    slides.forEach(function(s,idx){s.classList.toggle('active', idx===i);});
+    dots.forEach(function(d,idx){d.classList.toggle('on', idx===i);});
+    curEl.textContent=String(i+1).padStart(2,'0');
+  }
+  var io=new IntersectionObserver(function(entries){
+    var best=null,bestRatio=0;
+    entries.forEach(function(e){if(e.isIntersecting&&e.intersectionRatio>bestRatio){bestRatio=e.intersectionRatio;best=e.target;}});
+    if(best){setActive(slides.indexOf(best));}
+  },{threshold:[.25,.5,.75,.9]});
+  slides.forEach(function(s){io.observe(s);});
+  setActive(0);
+  // YouTube facade: inline play when hosted (http/https), open on YouTube when run as a local file
+  Array.prototype.slice.call(document.querySelectorAll('.ytbox')).forEach(function(box){
+    var id = box.getAttribute('data-yt');
+    var btn = box.querySelector('.ytfacade');
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      if(location.protocol === 'file:'){
+        window.open('https://www.youtube.com/watch?v=' + id, '_blank');
+        return;
+      }
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+      f.setAttribute('allow','accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+      f.setAttribute('allowfullscreen','');
+      box.innerHTML = '';
+      box.appendChild(f);
+    });
+  });
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var p=h>0?(window.scrollY/h)*100:0;
+    bar.style.width=p.toFixed(2)+'%';
+    if(window.scrollY>40) document.body.classList.add('scrolled');
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  dots.forEach(function(d){d.addEventListener('click',function(){
+    var n=parseInt(d.getAttribute('data-go'),10)-1;
+    slides[n].scrollIntoView({behavior:'smooth',block:'center'});
+  });});
+  function go(delta){var n=Math.min(total-1,Math.max(0,active+delta));slides[n].scrollIntoView({behavior:'smooth',block:'center'});}
+  window.addEventListener('keydown',function(e){
+    if(/^(INPUT|TEXTAREA|IFRAME)$/.test((e.target&&e.target.tagName)||'')) return;
+    switch(e.key){
+      case 'ArrowDown':case 'PageDown':case ' ':e.preventDefault();go(1);break;
+      case 'ArrowUp':case 'PageUp':e.preventDefault();go(-1);break;
+      case 'Home':e.preventDefault();slides[0].scrollIntoView({behavior:'smooth',block:'center'});break;
+      case 'End':e.preventDefault();slides[total-1].scrollIntoView({behavior:'smooth',block:'center'});break;
+    }
+  });
+})();
+</script>
+</body>
+</html>
